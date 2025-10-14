@@ -1,0 +1,119 @@
+{% extends 'base.html' %} {% block content %}
+<section class="section-header">
+  <h2>Your Shortened URLs</h2>
+  <a class="btn btn--primary" href="{% url 'create' %}">+ Create New</a>
+</section>
+
+{% if urls %}
+<div class="table-wrap">
+  <table class="table" id="urls-table">
+    <thead>
+      <tr>
+        <th>Short URL</th>
+        <th>Original URL</th>
+        <th>Clicks</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for url in urls %}
+      <tr data-url-id="{{ url.id }}">
+        <td>
+          <div class="inline">
+            <a href="/{{ url.short_code }}" target="_blank"
+              >{{ request.get_host }}/{{ url.short_code }}</a
+            >
+            <button
+              class="btn btn--sm"
+              type="button"
+              data-copy="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}"
+            >
+              Copy
+            </button>
+          </div>
+        </td>
+        <td class="truncate" title="{{ url.original_url }}">
+          {{ url.original_url }}
+        </td>
+        <td class="clicks" data-clicks="{{ url.click_count }}">
+          {{ url.click_count }}
+        </td>
+        <td class="text-right">
+          <a class="btn btn--danger btn--sm" href="{% url 'delete' url.id %}"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty">
+  <p>No URLs yet. Create your first short link.</p>
+  <a class="btn btn--primary" href="{% url 'create' %}">Create short link</a>
+</div>
+{% endif %}
+<script>
+  // Poll the server for updated click counts every 5 seconds and update the table.
+  (function () {
+    const BASE_ENDPOINT = '{% url "clicks_snapshot" %}';
+    const table = document.getElementById("urls-table");
+    if (!table) return;
+    let stopped = false;
+
+    const updateCells = (data) => {
+      const map = new Map();
+      data.clicks.forEach((item) => map.set(String(item.id), item.click_count));
+      const rows = table.querySelectorAll("tbody tr[data-url-id]");
+      rows.forEach((row) => {
+        const id = row.getAttribute("data-url-id");
+        const newVal = map.get(id);
+        const cell = row.querySelector("td.clicks");
+        if (cell && typeof newVal === "number") {
+          const prev = Number(cell.getAttribute("data-clicks")) || 0;
+          if (newVal !== prev) {
+            cell.textContent = newVal;
+            cell.setAttribute("data-clicks", String(newVal));
+            cell.classList.add("pulse");
+            setTimeout(() => cell.classList.remove("pulse"), 600);
+          }
+        }
+      });
+    };
+
+    const poll = () => {
+      if (stopped) return;
+      const url =
+        BASE_ENDPOINT +
+        (BASE_ENDPOINT.includes("?") ? "&" : "?") +
+        "t=" +
+        Date.now();
+      fetch(url, {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      })
+        .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+        .then(updateCells)
+        .catch((e) => {
+          console.warn("Polling failed", e);
+        })
+        .finally(() => setTimeout(poll, 2000));
+    };
+
+    document.addEventListener("visibilitychange", () => {
+      stopped = document.hidden;
+      if (!stopped) poll();
+    });
+
+    poll();
+  })();
+</script>
+{% endblock %}

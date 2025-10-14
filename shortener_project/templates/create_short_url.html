@@ -1,0 +1,47 @@
+{% extends 'base.html' %} {% block content %}
+<section class="card">
+  <header class="card__header">
+    <h2>Shorten a URL</h2>
+  </header>
+  <div class="card__body">
+    <form method="POST" class="form">
+      {% csrf_token %}
+      <div class="form__group">
+        <label for="id_original_url">Original URL</label>
+        {{ form.original_url }} {% if form.original_url.errors %}
+        <small class="form__error"
+          >{{ form.original_url.errors|striptags }}</small
+        >
+        {% endif %}
+      </div>
+      {% if form.custom_alias %}
+      <div class="form__group">
+        <label for="id_custom_alias">Custom alias (optional)</label>
+        {{ form.custom_alias }} {% if form.custom_alias.errors %}
+        <small class="form__error"
+          >{{ form.custom_alias.errors|striptags }}</small
+        >
+        {% endif %}
+      </div>
+      {% endif %}
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary">
+          Create short link
+        </button>
+      </div>
+    </form>
+
+    {% if short_url %}
+    <div class="result">
+      <p class="muted">Your short link:</p>
+      <div class="input-copy">
+        <input class="input" value="{{ short_url }}" readonly />
+        <button class="btn" type="button" data-copy="{{ short_url }}">
+          Copy
+        </button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
