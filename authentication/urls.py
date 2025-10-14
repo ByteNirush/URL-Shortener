@@ -2,10 +2,15 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from . import views
+from .forms import LoginForm
 
 urlpatterns =[
     path('register/', views.register_view, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login'),
+    path('login/', auth_views.LoginView.as_view(
+        template_name='login.html',
+        redirect_authenticated_user=True,
+        authentication_form=LoginForm
+    ), name='login'),
     # Confirmation page to show a GUI with a logout button
     path('logout/confirm/', TemplateView.as_view(template_name='logout_confirm.html'), name='logout_confirm'),
     # Logout via POST, then redirect to login
