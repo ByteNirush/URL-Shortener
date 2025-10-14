@@ -1,9 +1,20 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Logout</h2>
-<p>Are you sure you want to log out?</p>
-<form method="post" action="{% url 'logout' %}">
-  {% csrf_token %}
-  <button type="submit">Yes, log me out</button>
-  <a href="{% url 'dashboard' %}">Cancel</a>
-</form>
+<section class="card" style="max-width: 520px; margin: 28px auto">
+  <header class="card__header">
+    <h2>Logout</h2>
+  </header>
+  <div class="card__body">
+    <p>Are you sure you want to log out?</p>
+    <form
+      method="post"
+      action="{% url 'logout' %}"
+      class="form"
+      style="display: flex; gap: 8px"
+    >
+      {% csrf_token %}
+      <button type="submit" class="btn btn--danger">Yes, log me out</button>
+      <a class="btn" href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+  </div>
+</section>
 {% endblock %}

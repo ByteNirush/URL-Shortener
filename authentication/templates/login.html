@@ -1,17 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
-<body>
-    <h2>Login</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
+{% extends 'base.html' %} {% block content %}
+<section class="card" style="max-width: 520px; margin: 28px auto">
+  <header class="card__header">
+    <h2>Welcome back</h2>
+  </header>
+  <div class="card__body">
+    {% if form.non_field_errors %}
+    <div class="alerts">
+      <div class="alert">{{ form.non_field_errors }}</div>
+    </div>
+    {% endif %}
+    <form method="POST" class="form">
+      {% csrf_token %}
+      <div class="form__group">
+        <label for="id_username">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="form__group">
+        <label for="id_password">Password</label>
+        {{ form.password }}
+      </div>
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary" style="width: 100%">
+          Log in
+        </button>
+      </div>
     </form>
-    <p>Don’t have an account? <a href="{% url 'register' %}">Register</a></p>
-</body>
-</html>
+
+    <p class="muted" style="margin-top: 12px">
+      Don’t have an account? <a href="{% url 'register' %}">Register</a>
+    </p>
+  </div>
+</section>
+<script>
+  // Toggle password visibility on the login form
+  (function () {
+    const pwd = document.getElementById("id_password");
+    if (!pwd) return;
+    // create toggle button next to the field
+    const wrapper = document.createElement("div");
+    wrapper.className = "input-group";
+    pwd.parentNode.insertBefore(wrapper, pwd);
+    wrapper.appendChild(pwd);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn--sm btn--ghost";
+    btn.textContent = "Show";
+    btn.addEventListener("click", () => {
+      const visible = pwd.type === "text";
+      pwd.type = visible ? "password" : "text";
+      btn.textContent = visible ? "Show" : "Hide";
+    });
+    wrapper.appendChild(btn);
+  })();
+</script>
+{% endblock %}

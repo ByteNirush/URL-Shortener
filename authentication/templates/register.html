@@ -1,17 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-</head>
-<body>
-    <h2>Create Account</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
+{% extends 'base.html' %} {% block content %}
+<section class="card" style="max-width: 620px; margin: 28px auto">
+  <header class="card__header">
+    <h2>Create your account</h2>
+  </header>
+  <div class="card__body">
+    {% if form.non_field_errors %}
+    <div class="alerts">
+      <div class="alert">{{ form.non_field_errors }}</div>
+    </div>
+    {% endif %}
+    <form method="POST" class="form">
+      {% csrf_token %}
+      <div class="form__group">
+        <label for="id_username">Username</label>
+        {{ form.username }} {% if form.username.errors %}
+        <small class="form__error">{{ form.username.errors|striptags }}</small>
+        {% endif %}
+      </div>
+      <div class="form__group">
+        <label for="id_email">Email</label>
+        {{ form.email }} {% if form.email.errors %}
+        <small class="form__error">{{ form.email.errors|striptags }}</small>
+        {% endif %}
+      </div>
+      <div class="form__group">
+        <label for="id_password1">Password</label>
+        {{ form.password1 }} {% if form.password1.errors %}
+        <small class="form__error">{{ form.password1.errors|striptags }}</small>
+        {% endif %}
+      </div>
+      <div class="form__group">
+        <label for="id_password2">Confirm password</label>
+        {{ form.password2 }} {% if form.password2.errors %}
+        <small class="form__error">{{ form.password2.errors|striptags }}</small>
+        {% endif %}
+      </div>
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary" style="width: 100%">
+          Create account
+        </button>
+      </div>
     </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
-</body>
-</html>
+
+    <p class="muted" style="margin-top: 12px">
+      Already have an account? <a href="{% url 'login' %}">Log in</a>
+    </p>
+  </div>
+</section>
+<script>
+  // Toggle visibility for password fields on register
+  (function () {
+    const toggle = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const wrapper = document.createElement("div");
+      wrapper.className = "input-group";
+      el.parentNode.insertBefore(wrapper, el);
+      wrapper.appendChild(el);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn--sm btn--ghost";
+      btn.textContent = "Show";
+      btn.addEventListener("click", () => {
+        const visible = el.type === "text";
+        el.type = visible ? "password" : "text";
+        btn.textContent = visible ? "Show" : "Hide";
+      });
+      wrapper.appendChild(btn);
+    };
+    toggle("id_password1");
+    toggle("id_password2");
+  })();
+</script>
+{% endblock %}
